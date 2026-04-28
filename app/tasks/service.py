@@ -42,22 +42,26 @@ class TaskService():
             
         raise TaskNotFoundError(task_id)
 
-    def update_task(self, task_new: Task) -> Task:
-        normalized_title = task_new.title.strip()
-        if normalized_title == "":
-            raise TaskEmptyTitleError()
-
-        if any(task.id != task_new.id and task.title == normalized_title for task in self.tasks):
-            raise TaskAlreadyExistsError()
-
+    def update_task(self, task_id: uuid.UUID, task_title: str | None, task_status: TaskStatus | None) -> Task:
         for task in self.tasks:
-            if task.id == task_new.id:
-                task.title = normalized_title
-                task.status = task_new.status
-                self.repository.save_tasks(self.tasks)
-                return task
+            if task.id != task_id:
+                continue
 
-        raise TaskNotFoundError(task_new.id)
+            if task_title is not None:
+                normalized_title = task_title.strip()
+                if normalized_title == "":
+                    raise TaskEmptyTitleError()
+                if any(task.id != task_id and task.title == normalized_title for task in self.tasks):
+                    raise TaskAlreadyExistsError()
+                task.title = normalized_title
+
+            if task_status is not None:
+                task.status = task_status
+
+            self.repository.save_tasks(self.tasks)
+            return task
+
+        raise TaskNotFoundError(task_id)
 
     def update_task_title(self, task_id: uuid.UUID, task_title: str) -> Task:
         normalized_title = task_title.strip()

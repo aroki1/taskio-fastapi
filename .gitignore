@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+tasks.json
+.idea/
+
+uv.lock
+.python-version
